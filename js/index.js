@@ -1,4 +1,7 @@
-(function() {
+
+conn = new WebSocket('ws://localhost:8080/');
+
+conn.onopen = function(e) {
   var board = document.getElementById('board');
   var maxX;
   var maxY;
@@ -6,15 +9,7 @@
   var step = 0;
   var speed = 10;
 
-  var conn = new WebSocket('ws://localhost:8080');
-  conn.onopen = function(e) {
-    console.log("Connection established!");
-  };
-
-  conn.onmessage = function(e) {
-    console.log(e.data);
-  };
-
+  console.log("Connection established!");
 
   window.onresize = function() {
     maxX = board.clientWidth / 5;
@@ -212,16 +207,22 @@
 
   function loop() {
     for (var i = 0, snake; snake = snakes[i]; i++) {
-      conn.send(moveSnake(snake));
+      conn.send(JSON.stringify(moveSnake(snake)));
     }
     step++;
     var oldTime = time;
     time = Date.now();
     window.setTimeout(loop, 1000 / speed + oldTime - time);
-    console.log(step);
   }
 
 
+  conn.onmessage = function(e) {
+    var player = JSON.parse(e.data);
+    console.log(player);
+  };
 
 
-})();
+}.bind(conn);
+
+
+
